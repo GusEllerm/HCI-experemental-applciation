@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+    <Button
+            android:text="@string/startActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/startTrial" tools:text="@string/startActivity"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="40dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.48"/>
+    <RadioGroup
+            android:layout_width="117dp"
+            android:layout_height="184dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="84dp"
+            android:layout_marginTop="272dp" app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/participantRadioGroup">
+        <RadioButton
+                android:text="Participant1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/participant1" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton2" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton3" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton4" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton5" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton6" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Participant7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/radioButton7" android:layout_weight="1"/>
+    </RadioGroup>
+    <TextView
+            android:text="Participant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/participantRadioGroup"
+            app:layout_constraintEnd_toEndOf="@+id/participantRadioGroup"
+            app:layout_constraintStart_toStartOf="@+id/participantRadioGroup"
+            android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Title"/>
+    <TextView
+            android:text="No membrane mode selected"
+            android:layout_width="134dp"
+            android:layout_height="39dp"
+            android:id="@+id/membraneSelected"
+            app:layout_constraintStart_toEndOf="@+id/selectedParticipant"
+            app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/makeLogFile"/>
+    <TextView
+            android:text="No participant selected"
+            android:layout_width="134dp"
+            android:layout_height="39dp"
+            android:id="@+id/selectedParticipant"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toStartOf="@+id/membraneSelected" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/makeLogFile"/>
+    <RadioGroup
+            android:layout_width="170dp"
+            android:layout_height="106dp"
+            android:id="@+id/membraneRadioGroup" app:layout_constraintStart_toEndOf="@+id/participantRadioGroup"
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="24dp"
+            android:layout_marginTop="312dp">
+        <RadioButton
+                android:text="With_Membrane"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/withMembrane" android:layout_weight="1"/>
+        <RadioButton
+                android:text="Without_Membrane"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/withoutMembrane" android:layout_weight="1"/>
+    </RadioGroup>
+    <Button
+            android:text="Generate log file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/makeLogFile" android:layout_marginBottom="60dp"
+            app:layout_constraintBottom_toTopOf="@+id/startTrial" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="128dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="128dp"/>
+    <TextView
+            android:text="Recording to no file"
+            android:layout_width="131dp"
+            android:layout_height="44dp"
+            android:id="@+id/recordingFile" app:layout_constraintStart_toEndOf="@+id/startTrial"
+            android:layout_marginStart="8dp" app:layout_constraintTop_toBottomOf="@+id/membraneSelected"
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.265"/>
+</android.support.constraint.ConstraintLayout>
