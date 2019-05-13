@@ -1,5 +1,7 @@
 package com.example.hciproject
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.nfc.Tag
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -11,9 +13,13 @@ import android.view.MenuItem
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_trial.*
 import android.os.CountDownTimer
+import android.os.Environment
 import android.view.MotionEvent
+import android.view.Window
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_trial.view.*
+import java.io.File
+import java.io.FileOutputStream
 
 
 /**
@@ -23,6 +29,9 @@ import kotlinx.android.synthetic.main.activity_trial.view.*
 class TrialActivity : AppCompatActivity() {
 
     lateinit var FILE_NAME: String
+    lateinit var filePath: File
+    lateinit var participant: String
+    lateinit var membrane: String
 
     // Button decelerations
     lateinit var button1: Button
@@ -45,15 +54,26 @@ class TrialActivity : AppCompatActivity() {
     lateinit var button18: Button
     lateinit var button19: Button
     lateinit var button20: Button
+    lateinit var buttons: Map<Int, Button>
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_trial)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+
+
+
         val intent = intent
         FILE_NAME = intent.getStringExtra("FileName")
+        participant = intent.getStringExtra("Participant")
+        membrane = intent.getStringExtra("Membrane")
+
+        filePath = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), FILE_NAME)
+//        file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), FILE_NAME)
+
         Toast.makeText(this, "$FILE_NAME recording", Toast.LENGTH_SHORT).show()
 
 
@@ -78,50 +98,140 @@ class TrialActivity : AppCompatActivity() {
         button19 = findViewById(R.id.Btn19)
         button20 = findViewById(R.id.Btn20)
 
-        button1.setOnTouchListener(View.OnTouchListener{ _, event ->
+        buttons = mapOf(
+            1 to button1,
+            2 to button2,
+            3 to button3,
+            4 to button4,
+            5 to button5,
+            6 to button6,
+            7 to button7,
+            8 to button8,
+            9 to button9,
+            10 to button10,
+            11 to button11,
+            12 to button12,
+            13 to button13,
+            14 to button14,
+            15 to button15,
+            16 to button16,
+            17 to button17,
+            18 to button18,
+            19 to button19,
+            20 to button20
+        )
+
+        buttons.forEach { _, button ->
+            button.setOnTouchListener(object: View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent): Boolean {
+                    val x = event.x
+                    val y = event.y
+
+                    writeToFile(x, y, targetHit = "false")
+
+                    return v?.onTouchEvent(event) ?: true
+
+                }
+            })
+        }
+
+
+        hideSystemUI()
+        setTouchListner()
+        hideButtons()
+        initWaitPeriod()
+        startFirstTrial()
+
+    }
+
+
+    companion object {
+        val NUM_TRIALS = 10
+        var DONE_TRIALS = 0
+        var CURRENT_BUTTON = 0
+    }
+
+    private fun hideButtons() {
+        buttons.forEach { _, button ->
+            button.visibility = View.INVISIBLE
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun startFirstTrial() {
+        CURRENT_BUTTON = (1..20).random()
+        Log.e("CurrentButton", "$CURRENT_BUTTON")
+
+        buttons[CURRENT_BUTTON]?.visibility = View.VISIBLE
+        buttons[CURRENT_BUTTON]?.setOnTouchListener(View.OnTouchListener{ _, event ->
             val x = event.x
             val y = event.y
 
-            Log.d("Action", "ACTION_DOWN \n" +
-                    "x: $x\n" +
-                    "y: $y\n " +
-                    "TargetHit: true")
+            writeToFile(x, y, targetHit = "true")
+            nextTrial()
 
             return@OnTouchListener  true
         })
 
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun nextTrial() {
 
-        hideSystemUI()
-        initWaitPeriod()
+        DONE_TRIALS += 1
 
+        if (DONE_TRIALS != NUM_TRIALS) {
+            buttons[CURRENT_BUTTON]?.visibility = View.INVISIBLE
+            buttons[CURRENT_BUTTON]?.setOnTouchListener(object: View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent): Boolean {
+                    val x = event.x
+                    val y = event.y
+
+                    writeToFile(x, y, targetHit = "false")
+
+                    return v?.onTouchEvent(event) ?: true
+
+                }
+            })
+
+            CURRENT_BUTTON = (1..20).random()
+            Log.e("CurrentButton", "$CURRENT_BUTTON")
+
+            buttons[CURRENT_BUTTON]?.visibility = View.VISIBLE
+            buttons[CURRENT_BUTTON]?.setOnTouchListener(object: View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent): Boolean {
+                    val x = event.x
+                    val y = event.y
+
+                    writeToFile(x, y, targetHit = "true")
+                    nextTrial()
+
+                    return v?.onTouchEvent(event) ?: true
+
+                }
+            })
+
+        } else {
+            //TODO END EXPEREMENT
+        }
+    }
+
+    private fun writeToFile(x: Float, y: Float, targetHit: String) {
+
+        val time = System.nanoTime()
+        val inputLine = "participant: $participant, membrane: $membrane, time: $time, coords:($x, $y), targetButton: $CURRENT_BUTTON, targetHit: $targetHit\n"
+        filePath.appendText(inputLine)
+//        applicationContext.openFileOutput(filePath.absolutePath, Context.MODE_APPEND).use {
+//            it.write(inputLine.toByteArray())
+//        }
     }
 
     private fun setTouchListner() {
         this.touchListner.setOnTouchListener(View.OnTouchListener { _, event ->
             val x = event.x
             val y = event.y
+            writeToFile(x, y, targetHit = "false")
 
-            when(event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    Log.d("Action", "ACTION_DOWN \n" +
-                            "x: $x\n" +
-                            "y: $y\n " +
-                            "TargetHit: false")
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    Log.d("Action", "ACTION_MOVE \n" +
-                            "x: $x\n" +
-                            "y: $y\n" +
-                            " TargetHit: false")
-                }
-                MotionEvent.ACTION_UP -> {
-                    Log.d("Action", "ACTION_UP \n" +
-                            "x: $x\n" +
-                            "y: $y\n" +
-                            " TargetHit: false")
-                }
-            }
             return@OnTouchListener  true
         })
     }

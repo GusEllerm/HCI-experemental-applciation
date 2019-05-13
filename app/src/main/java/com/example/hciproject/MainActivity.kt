@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         startTrialButton.setOnClickListener {
             val intent = Intent(this, TrialActivity::class.java)
             intent.putExtra("FileName", "${selectedParticipant.text}_${membraneSelected.text}.txt")
+            intent.putExtra("Participant", "${selectedParticipant.text}")
+            intent.putExtra("Membrane", "${membraneSelected.text}")
+
             startActivity(intent)
         }
 
