@@ -163,7 +163,9 @@ class TrialActivity : AppCompatActivity() {
         Log.e("CurrentButton", "$CURRENT_BUTTON")
 
         buttons[CURRENT_BUTTON]?.visibility = View.VISIBLE
-        buttons[CURRENT_BUTTON]?.setOnTouchListener(View.OnTouchListener{ _, event ->
+        buttons[CURRENT_BUTTON]?.setOnTouchListener(
+
+            View.OnTouchListener{ _, event ->
             val x = event.x
             val y = event.y
 
@@ -181,6 +183,7 @@ class TrialActivity : AppCompatActivity() {
         DONE_TRIALS += 1
 
         if (DONE_TRIALS != NUM_TRIALS) {
+            this.touchListner.isEnabled = false
             buttons[CURRENT_BUTTON]?.visibility = View.INVISIBLE
             buttons[CURRENT_BUTTON]?.setOnTouchListener(object: View.OnTouchListener {
                 override fun onTouch(v: View?, event: MotionEvent): Boolean {
@@ -211,6 +214,8 @@ class TrialActivity : AppCompatActivity() {
                 }
             })
 
+            this.touchListner.isEnabled = true
+
         } else {
             //TODO END EXPEREMENT
         }
@@ -219,7 +224,7 @@ class TrialActivity : AppCompatActivity() {
     private fun writeToFile(x: Float, y: Float, targetHit: String) {
 
         val time = System.nanoTime()
-        val inputLine = "participant: $participant, membrane: $membrane, time: $time, coords:($x, $y), targetButton: $CURRENT_BUTTON, targetHit: $targetHit\n"
+        val inputLine = "$participant,$membrane,$time,$x,$y,$CURRENT_BUTTON,$targetHit\n"
         filePath.appendText(inputLine)
 //        applicationContext.openFileOutput(filePath.absolutePath, Context.MODE_APPEND).use {
 //            it.write(inputLine.toByteArray())

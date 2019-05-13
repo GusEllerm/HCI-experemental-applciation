@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         val startTrialButton = findViewById<Button>(R.id.startTrial)
         startTrialButton.setOnClickListener {
             val intent = Intent(this, TrialActivity::class.java)
-            intent.putExtra("FileName", "${selectedParticipant.text}_${membraneSelected.text}.txt")
+            intent.putExtra("FileName", "${selectedParticipant.text}_${membraneSelected.text}.csv")
             intent.putExtra("Participant", "${selectedParticipant.text}")
             intent.putExtra("Membrane", "${membraneSelected.text}")
 
@@ -52,6 +52,11 @@ class MainActivity : AppCompatActivity() {
             selectedMembrane.text = radioButton.text
         }
         checkPermissions()
+
+        val toCalibration = findViewById<Button>(R.id.calibration)
+        toCalibration.setOnClickListener{
+            startActivity(Intent(this, Calibration::class.java))
+        }
     }
 
     private fun checkPermissions() {
@@ -66,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createTrial() {
         if (isExternalStorageWritable()) {
-            FILE_NAME = "${selectedParticipant.text}_${membraneSelected.text}.txt"
+            FILE_NAME = "${selectedParticipant.text}_${membraneSelected.text}.csv"
             getPublicSTorageDir()
         } else {
             Log.e("External Storage", "Storage is not writable")
@@ -82,6 +87,9 @@ class MainActivity : AppCompatActivity() {
         if (!file.createNewFile()) {
             Log.e("file exists", "trial already exists")
             Toast.makeText(this, "THIS TRIAL ALREADY HAS A FILE - DELETE AND RESTART", Toast.LENGTH_LONG).show()
+        } else {
+            val inputLine = "participant,membrane,time,x_coord,y_coord,targetButton,targetHit\n"
+            file.appendText(inputLine)
         }
         return file
     }
