@@ -1,25 +1,16 @@
 package com.example.hciproject
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.nfc.Tag
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
-import android.support.v4.app.NavUtils
 import android.util.Log
-import android.view.MenuItem
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_trial.*
-import android.os.CountDownTimer
 import android.os.Environment
-import android.view.MotionEvent
-import android.view.Window
 import android.widget.Button
-import kotlinx.android.synthetic.main.activity_trial.view.*
+import android.widget.TextView
 import java.io.File
-import java.io.FileOutputStream
 
 
 /**
@@ -55,6 +46,7 @@ class TrialActivity : AppCompatActivity() {
     lateinit var button19: Button
     lateinit var button20: Button
     lateinit var buttons: Map<Int, Button>
+    lateinit var finishScreen: TextView
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +55,8 @@ class TrialActivity : AppCompatActivity() {
         setContentView(R.layout.activity_trial)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-
-
+        finishScreen = findViewById(R.id.finished)
+        finishScreen.visibility = View.GONE
 
         val intent = intent
         FILE_NAME = intent.getStringExtra("FileName")
@@ -122,33 +114,33 @@ class TrialActivity : AppCompatActivity() {
         )
 
         buttons.forEach { _, button ->
-            button.setOnTouchListener(object: View.OnTouchListener {
-                override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                    val x = event.x
-                    val y = event.y
-
-                    writeToFile(x, y, targetHit = "false")
-
-                    return v?.onTouchEvent(event) ?: true
-
-                }
-            })
+            button.setOnClickListener {
+                writeToFile(targetHit = "false")
+            }
         }
 
+        val startTrial = findViewById<Button>(R.id.startTrial)
+        startTrial.setOnClickListener {
+            startTrial.visibility = View.GONE
+            setTouchListner()
+            startFirstTrial()
+        }
 
         hideSystemUI()
-        setTouchListner()
         hideButtons()
-        initWaitPeriod()
-        startFirstTrial()
-
     }
 
+    override fun onResume() {
+        super.onResume()
+        DONE_TRIALS = 0
+    }
 
     companion object {
-        val NUM_TRIALS = 10
+        const val NUM_TRIALS = 10
         var DONE_TRIALS = 0
         var CURRENT_BUTTON = 0
+        var PREVIOUS_BUTTON = 0
+        var START_TIME = System.nanoTime()
     }
 
     private fun hideButtons() {
@@ -163,17 +155,12 @@ class TrialActivity : AppCompatActivity() {
         Log.e("CurrentButton", "$CURRENT_BUTTON")
 
         buttons[CURRENT_BUTTON]?.visibility = View.VISIBLE
-        buttons[CURRENT_BUTTON]?.setOnTouchListener(
 
-            View.OnTouchListener{ _, event ->
-            val x = event.x
-            val y = event.y
-
-            writeToFile(x, y, targetHit = "true")
+        buttons[CURRENT_BUTTON]?.setOnClickListener {
+            writeToFile(targetHit = "true")
             nextTrial()
-
-            return@OnTouchListener  true
-        })
+        }
+        START_TIME = System.nanoTime()
 
     }
 
@@ -182,49 +169,43 @@ class TrialActivity : AppCompatActivity() {
 
         DONE_TRIALS += 1
 
-        if (DONE_TRIALS != NUM_TRIALS) {
+        if (DONE_TRIALS < NUM_TRIALS) {
             this.touchListner.isEnabled = false
             buttons[CURRENT_BUTTON]?.visibility = View.INVISIBLE
-            buttons[CURRENT_BUTTON]?.setOnTouchListener(object: View.OnTouchListener {
-                override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                    val x = event.x
-                    val y = event.y
 
-                    writeToFile(x, y, targetHit = "false")
+            buttons[CURRENT_BUTTON]?.setOnClickListener {
+                writeToFile(targetHit = "false")
+            }
 
-                    return v?.onTouchEvent(event) ?: true
-
-                }
-            })
-
+            // Check that it wont be the same button again
+            PREVIOUS_BUTTON = CURRENT_BUTTON
             CURRENT_BUTTON = (1..20).random()
+            while (CURRENT_BUTTON == PREVIOUS_BUTTON) {
+                CURRENT_BUTTON = (1..20).random()
+            }
+
             Log.e("CurrentButton", "$CURRENT_BUTTON")
 
             buttons[CURRENT_BUTTON]?.visibility = View.VISIBLE
-            buttons[CURRENT_BUTTON]?.setOnTouchListener(object: View.OnTouchListener {
-                override fun onTouch(v: View?, event: MotionEvent): Boolean {
-                    val x = event.x
-                    val y = event.y
 
-                    writeToFile(x, y, targetHit = "true")
-                    nextTrial()
-
-                    return v?.onTouchEvent(event) ?: true
-
-                }
-            })
+            buttons[CURRENT_BUTTON]?.setOnClickListener {
+                writeToFile(targetHit = "true")
+                nextTrial()
+            }
 
             this.touchListner.isEnabled = true
+            START_TIME = System.nanoTime()
 
         } else {
-            //TODO END EXPEREMENT
+            hideButtons()
+            finishScreen.visibility = View.VISIBLE
         }
     }
 
-    private fun writeToFile(x: Float, y: Float, targetHit: String) {
+    private fun writeToFile(targetHit: String) {
 
-        val time = System.nanoTime()
-        val inputLine = "$participant,$membrane,$time,$x,$y,$CURRENT_BUTTON,$targetHit\n"
+        val eventTime = System.nanoTime()
+        val inputLine = "$participant,$membrane,$START_TIME,$eventTime,$CURRENT_BUTTON,$targetHit\n"
         filePath.appendText(inputLine)
 //        applicationContext.openFileOutput(filePath.absolutePath, Context.MODE_APPEND).use {
 //            it.write(inputLine.toByteArray())
@@ -232,29 +213,11 @@ class TrialActivity : AppCompatActivity() {
     }
 
     private fun setTouchListner() {
-        this.touchListner.setOnTouchListener(View.OnTouchListener { _, event ->
-            val x = event.x
-            val y = event.y
-            writeToFile(x, y, targetHit = "false")
-
-            return@OnTouchListener  true
-        })
+        this.touchListner.setOnClickListener{
+            writeToFile(targetHit = "false")
+        }
     }
 
-
-    private fun initWaitPeriod() {
-        object : CountDownTimer(20000, 1000) {
-
-            override fun onTick(millisUntilFinished: Long) {
-                Toast.makeText(applicationContext, "seconds remaining: " + millisUntilFinished / 1000, Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onFinish() {
-                Toast.makeText(applicationContext, "Start", Toast.LENGTH_SHORT).show()
-                setTouchListner()
-            }
-        }.start()
-    }
 
     private fun hideSystemUI() {
         // Enables regular immersive mode.
@@ -270,5 +233,6 @@ class TrialActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
         }
+
 
     }

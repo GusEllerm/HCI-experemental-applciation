@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.view.View
+import android.widget.Button
+import android.widget.TextView
 
 import kotlinx.android.synthetic.main.activity_calibration.*
 
@@ -23,6 +25,12 @@ class Calibration : AppCompatActivity() {
                 // Hide the nav bar and status bar
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
+
+        val finished = findViewById<TextView>(R.id.finished)
+        val start = findViewById<Button>(R.id.startTrial)
+
+        finished.visibility = View.GONE
+        start.visibility = View.GONE
     }
 
 }

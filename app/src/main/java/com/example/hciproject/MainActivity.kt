@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             Log.e("file exists", "trial already exists")
             Toast.makeText(this, "THIS TRIAL ALREADY HAS A FILE - DELETE AND RESTART", Toast.LENGTH_LONG).show()
         } else {
-            val inputLine = "participant,membrane,time,x_coord,y_coord,targetButton,targetHit\n"
+            val inputLine = "participant,membrane,startTime,eventTime,targetButton,targetHit\n"
             file.appendText(inputLine)
         }
         return file
